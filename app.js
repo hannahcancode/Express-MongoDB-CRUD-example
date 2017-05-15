@@ -8,15 +8,24 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var api = require('./routes/api');
+const authAPI = require('./middleware/authAPI')
+const mlab_user = process.env.MLAB_USER;
+const mlab_user = process.env.MLAB_PASS;
 
 
 var mongoose = require('mongoose');
 
 var app = express();
 
+var jwt = require('jsonwebtoken');
+
+// create new token
+// var token = jwt.sign({email: 'thompson.h@gmail.com' }, 'secretcode');
+// console.log(token);
+
 // database is called recipes
 // could inclucde the default port for mongodb: 'mongodb://localhost:27107/recipes'
-mongoose.connect('mongodb://localhost/recipes')
+mongoose.connect(`mongodb://${mlab_user}:${mlab_pass}@ds033046.mlab.com:33046/recipe_api`)
 const { connection: db} = mongoose;
 
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -36,6 +45,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api/*', authAPI)
 app.use('/', index);
 app.use('/users', users);
 app.use('/api', api);
